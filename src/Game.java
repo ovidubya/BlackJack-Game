@@ -1,7 +1,7 @@
 import java.util.Scanner;
 /**
  * This is a simple blackjack program for SER 215.
- * @author Ovadia Shalom, Christopher Vasquez, Paul Hood, Aaron Monahan
+ * @author Paul Hood, Aaron Monahan, Ovadia Shalom, Christopher Vasquez
  * @version 2/16/2017
  */
 public class Game {
