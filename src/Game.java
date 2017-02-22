@@ -1,45 +1,58 @@
 import java.util.Scanner;
+import java.lang.Math;
 /**
  * This is a simple blackjack program for SER 215.
- * @author Paul Hood, Aaron Monahan, Ovadia Shalom, Christopher Vasquez
+ * @author Paul Hood, Aaron Monahan Ovadia Shalom, Christopher Vasquez,
  * @version 2/16/2017
  */
 public class Game {
 	static Scanner scan = new Scanner(System.in);
 	static int[] playerHand = new int[2];
+	static int[] playerSecondHand = new int[2]; //for split function
 	static int[] dealerHand = new int[2];
 	static Deck dk = new Deck();
 	static String[] deck = dk.getShuffledDeck();
 	static int top = 51;
 	static int balance = 100;
+	static boolean canSplit = false;
+	static boolean canDoubleDown = false;
+	static int splitValue = 0;
 	public static void main(String[] args) {
 		
 		while(true)
 		{
 			//draw
+			System.out.println(top);
 			System.out.println("Your balance is " + balance);
 			System.out.println("The count is  " + dk.getCount());
 			System.out.println("Enter a bet value");
 			int wager = scan.nextInt();
 			printPlayerHand(top);
 			printDealerHand(top);
-			System.out.println("You can either: " + "hit " + "or " + "hold");
+			System.out.print("You can either: " + "hit " + "or " + "hold");
+			if(balance >= wager)
+			{
+				System.out.println(" or DD");
+			}
 			while(didPlayerBust() == false)
 			{
 				String a1 = scan.next();
-				if(a1.equals("hit"))
+				if(a1.equals("DD"))
 				{
+					wager = wager * 2;
 					hit();
-				}
-				if(a1.equals("hold"))
-				{
+					if(didPlayerBust() == true)
+					{
+						balance -= wager;
+						break;
+					}
 					while(didDealerSeventeen() == false)
 					{
 						hold();
 					}
 					if(didDealerSeventeen() == true)
 					{
-						int x = checkWinner2(); //was checkWinner()
+						int x = checkWinner(); //was checkWinner()2
 						if(x == 1)
 						{
 							System.out.println("Player win!");
@@ -55,7 +68,46 @@ public class Game {
 						}
 						else
 						{
-							System.out.println("Not sure");
+							System.out.println("Tie");
+							break;
+						}
+					}
+					
+				}
+				if(a1.equals("hit"))
+				{
+					hit();
+					if(didPlayerBust() == true)
+					{
+						balance -= wager;
+						break;
+					}
+				}
+				if(a1.equals("hold"))
+				{
+					while(didDealerSeventeen() == false)
+					{
+						hold();
+					}
+					if(didDealerSeventeen() == true)
+					{
+						int x = checkWinner(); //was checkWinner()2
+						if(x == 1)
+						{
+							System.out.println("Player win!");
+							balance += wager;
+							break;
+						}
+						else if(x == 2)
+						{
+							System.out.println("Dealer wins");
+							balance -= wager;
+							System.out.println("Dealers cards after hit: " + dealerHand[0] + "/" + dealerHand[1]);
+							break;
+						}
+						else
+						{
+							System.out.println("Tie");
 							break;
 						}
 					}
@@ -73,8 +125,16 @@ public class Game {
 	 */
 	public static void printPlayerHand(int i)
 	{
+		//Records the count of players hand
 		dk.valueOfCount(deck[i]);
 		dk.valueOfCount(deck[i-1]);
+		
+		//if player is holding cards of equal value, he can split
+		if(dk.getCardValue(deck[i]) == dk.getCardValue(deck[i-1]))
+		{
+			canSplit = true;
+			splitValue = dk.getCardValue(deck[i]);
+		}
 		System.out.println(deck[i] + " -- " + deck[i-1]);
 		if(dk.getCardValue(deck[i]) == 11 || dk.getCardValue(deck[i-1]) == 11) //one of the two cards is an ace
 		{
@@ -256,46 +316,6 @@ public class Game {
 		System.out.println("Dealers cards after hit: " + dealerHand[0] + "/" + dealerHand[1]);
 		
 	}
-	public static int checkWinner()
-	{
-		//1 means player and 2 means dealer
-		int playerResult = 0;
-		int dealerResult = 0;
-		if(playerHand[1] != 0)
-		{
-			playerResult = playerHand[1];
-		}
-		else
-		{
-			playerResult = playerHand[0];
-		}
-		if(dealerHand[1] != 0)
-		{
-			dealerResult = dealerHand[1];
-		}
-		else
-		{
-			dealerResult = dealerHand[0];
-		}
-		if(playerResult > 21)
-		{
-			return 2;
-		}
-		if(playerResult > dealerResult)
-		{
-			return 1;
-		}
-		if(playerResult == dealerResult)
-		{
-			return 0;
-		}
-		if(dealerResult > playerResult)
-		{
-			return 2;
-		}
-		return -1;
-		
-	}
 	public static boolean didPlayerBust()
 	{
 		if(playerHand[0] > 21 || playerHand[1] > 21)
@@ -329,26 +349,39 @@ public class Game {
 			return false;
 		}
 	}
-	public static int checkWinner2()
+	public static int checkWinner()
 	{
-	    //1 means player wins and 2 means dealer wins
-	    if(playerHand[0] > 21 || playerHand[1] > 21)
-	    {
-	        return 2;
-	    }
-	    else if((dealerHand[0] > 21 || dealerHand[1] > 21) && (playerHand[0] <= 21 || playerHand[1] <= 21))
-	    {
-	        return 1;
-	    }
-	    else if((playerHand[0] > dealerHand[0] || playerHand[0] > dealerHand[1]) && dealerHand[1] != 0)
-	    {
-	        return 1;
-	    }
-	    else
-	    {
-	        return 2;
-	    }
-	    
+		int playerScore = Math.max(playerHand[0], playerHand[1]);
+		int dealerScore = Math.max(dealerHand[0], dealerHand[1]);
+		if(playerScore > 21)
+		{
+			return 2; //Dealer Win
+		}
+		else if(dealerScore > 21 && playerScore <= 21)
+		{
+			return 1; //Player win
+		}
+		else if(playerScore ==  dealerScore)
+		{
+			return 3; //Tie game
+		}
+		else if(playerScore > dealerScore)
+		{
+			return 1;
+		}
+		else
+		{
+			return 2;
+		}
 	}
-
+	public static void split()
+	{
+		playerHand[0] = splitValue;
+		playerSecondHand[0] = splitValue;
+		System.out.println("Splitting...");
+		while(true)
+		{
+			
+		}
+	}
 }
