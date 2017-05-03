@@ -1,8 +1,18 @@
 import java.util.Random;
-
+/**
+ * This is a simple blackjack program for SER 215.
+ * 
+ * The deck class contains 3 attributes. rawDeck, count, and deck
+ * rawDeck is a string array with all 52 cards. E.g "Six of Hearts", "Ace of Clubs" "King of Diamonds", etc
+ * count contains a int value of each card that gets removed from the deck.
+ * deck contains a array of 52 card objects with which is intialized from fillDeck method
+ * 
+ * @author Paul Hood, Aaron Monahan Ovadia Shalom, Christopher Vasquez
+ * @version 2/24/2017
+ */
 public class Deck {
-	private int count = 0;
-	private String[] deck = {
+	//deck of a 52 cards in String format
+	private String[] rawDeck = {
 			"Ace of Hearts",
 			"Ace of Diamonds",
 			"Ace of Clubs",
@@ -56,103 +66,153 @@ public class Deck {
 			"Queen of Diamonds",
 			"King of Diamonds",
 			};
+	private int count; //count of cards
+	private Card[] deck; //deck that will be used in the game
 	public Deck()
 	{
+		//initialize deck object with 52 Card objects with null values 
+		deck = new Card[52];
 	}
-	public String[] getShuffledDeck()
+	/**
+	 * Iterates through the rawDeck. Splits each string in the raw deck to String[] tempCard. 
+	 * After split tempCard will contain 3 strings e.g "Six of Clubs" ==> "Six", "of", "Clubs"
+	 * 0th index will be the name of the card
+	 * 2th index will be the suit of the card
+	 * 
+	 */
+	public void fillDeck()
 	{
-		String[] copyDeck = deck;
-		shuffleDeck(copyDeck);
-		return copyDeck;
+		for(int i = 0; i < rawDeck.length; i++)
+		{
+			String[] tempCard = rawDeck[i].split(" "); //splits String to array of Strings e.g "Six", "of", "Clubs"
+			String tempName = tempCard[0]; //tempName will be the 0th index of the tempCard e.g "Six"
+			int tempValue = getCardValue(tempName); //tempValue will be card value of tempName e.g getCardValue("Six") ==> 6
+			String tempSuit = tempCard[2]; //tempSuit will be the 2th index of tempCard e.g "Clubs"
+			deck[i] = new Card(tempName, tempSuit, tempValue); //initialize card object in deck[i] with the following attributes
+		}
 	}
-	public void shuffleDeck(String[] ar)
+	/**
+	 * Shuffles deck object
+	 * @param deck	shuffles deck object
+	 */
+	public void shuffleDeck(Card[] deck)
 	{
-	    // If running on Java 6 or older, use `new Random()` on RHS here
-	    Random rnd = new Random();
-	    for (int i = ar.length - 1; i > 0; i--)
+		fillDeck(); //before shuffling deck, need to initialize first
+	    Random rnd = new Random(); //random object
+	    for (int i = deck.length - 1; i > 0; i--)
 	    {
 	      int index = rnd.nextInt(i + 1);
 	      // Simple swap
-	      String a = ar[index];
-	      ar[index] = ar[i];
-	      ar[i] = a;
+	      Card a = deck[index];
+	      deck[index] = deck[i];
+	      deck[i] = a;
 	    }
 	 }
+	/**
+	 * Retuns a copy of the deck object
+	 * @return	copyDeck	returns a copy of the deck object
+	 */
+	public Card[] getShuffledDeck()
+	{
+		Card[] copyDeck = deck;
+		shuffleDeck(copyDeck);
+		return copyDeck;
+	}
+	/**
+	 * Returns the value of the card based on the name of the card
+	 * @param n	name of the card
+	 * @return	returns the value of the card
+	 */
 	public int getCardValue(String n)
 	{
-		String[] card = n.split(" ");
-		if(card[0].equals("Two"))
+		if(n.equals("Two"))
 		{
 			return 2;
 		}
-		if(card[0].equals("Three"))
+		if(n.equals("Three"))
 		{
 			return 3;
 		}
-		if(card[0].equals("Four"))
+		if(n.equals("Four"))
 		{
 			return 4;
 		}
-		if(card[0].equals("Five"))
+		if(n.equals("Five"))
 		{
 			return 5;
 		}
-		if(card[0].equals("Six"))
+		if(n.equals("Six"))
 		{
 			return 6;
 		}
-		if(card[0].equals("Seven"))
+		if(n.equals("Seven"))
 		{
 			return 7;
 		}
-		if(card[0].equals("Eight"))
+		if(n.equals("Eight"))
 		{
 			return 8;
 		}
-		if(card[0].equals("Nine"))
+		if(n.equals("Nine"))
 		{
 			return 9;
 		}
-		if(card[0].equals("Ten"))
+		if(n.equals("Ten"))
 		{
 			return 10;
 		}
-		if(card[0].equals("Jack"))
+		if(n.equals("Jack"))
 		{
 			return 10;
 		}
-		if(card[0].equals("Queen"))
+		if(n.equals("Queen"))
 		{
 			return 10;
 		}
-		if(card[0].equals("King"))
+		if(n.equals("King"))
 		{
 			return 10;
 		}
-		if(card[0].equals("Ace"))
+		if(n.equals("Ace"))
 		{
 			return 11;
 		}
-		return 0;
+		return -1;
 	}
+	/**
+	 * Returns the current count
+	 * @return	count	count of cards out of the deck
+	 */
 	public int getCount()
 	{
 		return count;
 	}
-	public void valueOfCount(String n)
+	
+	/**
+	 * Resets the count to 0
+	 */
+	public void resetCount()
 	{
-		int value = getCardValue(n);
-		if(value == 2 || value == 3 || value == 4 || value == 5 || value == 6)
+		count = 0;
+	}
+	/**
+	 * Returns the count of a card object
+	 * @param n		card object 
+	 */
+	public void valueOfCount(Card n)
+	{
+		int value = n.getValue(); //gets the value of the card
+		if(value == 2 || value == 3 || value == 4 || value == 5 || value == 6) //if value is 2 3 4 5 6, add 1 to count
 		{
 			count++; //Plus 1
 		}
-		else if(value == 10 || value == 11)
+		else if(value == 10 || value == 11) //if card is jack, queen, king, or ace, minus 1 to count
 		{
 			count--; //Minus 1
 		}
-		else
+		else //if card is 7 8 9, do nothing
 		{
-			count += 0; // Zero
+			count += 0; // Zero 
 		}
 	}
 }
